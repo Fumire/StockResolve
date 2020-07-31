@@ -1,0 +1,12 @@
+FROM python:3.8.5
+LABEL maintainer="230@fumire.moe"
+
+ADD requirements.txt /
+RUN pip3 install --no-cache-dir --requirement /requirements.txt
+
+ADD *.py /
+ADD password*.txt /
+
+EXPOSE 3306
+
+CMD ["python3", "/test.py"]
