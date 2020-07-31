@@ -1,5 +1,6 @@
+RANDOM := $(shell bash -c 'echo $$RANDOM')
 DATE := $(shell date "+%y%m%d")
-IMAGE_NAME = stockcrawling:$(DATE)
+IMAGE_NAME = stockcrawling:$(RANDOM)
 
 DETACH_OPTS = --detach --restart "always" --publish-all 
 
@@ -29,4 +30,7 @@ stop:
 .PHONY += stop
 
 Stock: stock.py
+	docker ps | grep $@ || docker run --name $@_$(DATE) $(DETACH_OPTS) $(IMAGE_NAME) python3 /$<
+
+Name: name.py
 	docker ps | grep $@ || docker run --name $@_$(DATE) $(DETACH_OPTS) $(IMAGE_NAME) python3 /$<
