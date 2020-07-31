@@ -37,3 +37,6 @@ Name: name.py
 
 Indicator: indicator.py
 	docker ps | grep $@ || docker run --name $@_$(DATE) $(DETACH_OPTS) $(IMAGE_NAME) python3 /$<
+
+Index: index.py
+	docker ps | grep $@ || docker run --name $@_$(DATE) $(DETACH_OPTS) $(IMAGE_NAME) python3 /$<

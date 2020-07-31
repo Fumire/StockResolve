@@ -1,5 +1,5 @@
 """
-Get stock data
+Get index data
 """
 import datetime
 import time
