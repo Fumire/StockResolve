@@ -1,4 +1,4 @@
-IMAGE_NAME = stockestimation
+IMAGE_NAME = stockcrawling
 
 all:
 .PHONY += all
@@ -11,6 +11,10 @@ delete:
 	docker rmi $(IMAGE_NAME)
 .PHONY += delete
 
-test:
-	docker run --name Test --rm --interactive --tty --publish-all $(IMAGE_NAME)
+test: test.py
+	docker run --name Test --rm --tty --publish-all $(IMAGE_NAME) python3 /test.py
 .PHONY += test
+
+interactive:
+	docker run --name Test --rm --interactive --tty --publish-all $(IMAGE_NAME)
+.PHONY += interactive
