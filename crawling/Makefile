@@ -1,4 +1,7 @@
-IMAGE_NAME = stockcrawling
+DATE := $(shell date "+%y%m%d")
+IMAGE_NAME = stockcrawling:$(DATE)
+
+DETACH_OPTS = --detach --restart "always" --publish-all 
 
 all:
 .PHONY += all
@@ -18,3 +21,12 @@ test: test.py
 interactive:
 	docker run --name Test --rm --interactive --tty --publish-all $(IMAGE_NAME)
 .PHONY += interactive
+
+start: Stock
+.PHONY += start
+
+stop:
+.PHONY += stop
+
+Stock: stock.py
+	docker ps | grep $@ || docker run --name $@_$(DATE) $(DETACH_OPTS) $(IMAGE_NAME) python3 /$<
