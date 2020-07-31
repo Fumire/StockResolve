@@ -34,3 +34,6 @@ Stock: stock.py
 
 Name: name.py
 	docker ps | grep $@ || docker run --name $@_$(DATE) $(DETACH_OPTS) $(IMAGE_NAME) python3 /$<
+
+Indicator: indicator.py
+	docker ps | grep $@ || docker run --name $@_$(DATE) $(DETACH_OPTS) $(IMAGE_NAME) python3 /$<

@@ -22,4 +22,4 @@ while True:
 
     connection.close()
 
-    time.sleep(86400)
+    break
