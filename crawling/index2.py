@@ -25,7 +25,7 @@ while True:
         cursor = connection.cursor(pymysql.cursors.DictCursor)
 
         for index, row in data.iterrows():
-            sql = "INSERT INTO `IndexData` (`Symbol`, `Value`) VALUES (%s, %s)"
+            sql = "INSERT INTO `IndexData2` (`Symbol`, `Value`) VALUES (%s, %s)"
             cursor.execute(sql, (row["Symbol"], row["Last"]))
 
         connection.close()
