@@ -24,7 +24,9 @@ while True:
     name_data = pandas.read_excel("/data.xls")
     name_data.rename(columns={"종목코드": "Symbol", "기업명": "Name"}, inplace=True)
 
+    print("south korea")
     for index, row in name_data.iterrows():
+        print("-", row["Name"])
         query = "INSERT INTO `NameList` (`IndexColumn`, `Country`, `Name`, `Symbol`) VALUES (NULL, 'south korea', %s, %s);"
         cursor.execute(query, (row["Name"], row["Symbol"]))
 

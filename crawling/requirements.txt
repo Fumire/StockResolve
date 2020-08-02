@@ -4,3 +4,4 @@ pandas==1.1.0
 pymysql==0.10.0
 bs4==0.0.1
 fake_useragent==0.1.11
+xlrd==1.2.0
