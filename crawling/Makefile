@@ -23,7 +23,7 @@ interactive:
 	docker run --name Test --rm --interactive --tty --publish-all $(IMAGE_NAME)
 .PHONY += interactive
 
-start: Stock Name Indicator Index
+start: Stock Name Index KRX
 .PHONY += start
 
 stop:
@@ -37,4 +37,7 @@ Name: name.py
 	docker ps | grep $@ || docker run --name $@_$(DATE) $(DETACH_OPTS) $(IMAGE_NAME) python3 /$<
 
 Index: index.py
+	docker ps | grep $@ || docker run --name $@_$(DATE) $(DETACH_OPTS) $(IMAGE_NAME) python3 /$<
+
+KRX: KRX.py
 	docker ps | grep $@ || docker run --name $@_$(DATE) $(DETACH_OPTS) $(IMAGE_NAME) python3 /$<
