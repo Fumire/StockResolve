@@ -47,7 +47,7 @@ while True:
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
     for name in whole_data:
-        sql = "INSERT INTO `StockData` (`name`,`" + "`,`".join(whole_data[name].keys()) + "`) VALUES ('" + name + "'," + ",".join(list(map(lambda x: "'" + str(x) + "'", whole_data[name].values()))) + ")"
+        sql = "INSERT INTO `KRXData` (`Name`,`" + "`,`".join(whole_data[name].keys()) + "`) VALUES ('" + name + "'," + ",".join(list(map(lambda x: "'" + str(x) + "'", whole_data[name].values()))) + ")"
         cursor.execute(sql)
 
     connection.close()
