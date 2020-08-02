@@ -3,6 +3,7 @@ Get stock name data
 """
 import time
 import investpy
+import pandas
 import pymysql
 
 while True:
@@ -10,10 +11,7 @@ while True:
         connection = pymysql.connect(host="fumire.moe", user="fumiremo_stock", password=f.readline().strip(), db="fumiremo_StockDB", charset="utf8", port=3306)
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
-    query = "DELETE FROM `NameList` WHERE `Country` LIKE 'japan"
-    cursor.execute(query)
-
-    query = "DELETE FROM `NameList` WHERE `Country` LIKE 'united states"
+    query = "TRUNCATE `NameList`"
     cursor.execute(query)
 
     for country in ["japan", "united states"]:
@@ -22,6 +20,13 @@ while True:
             print("-", row["name"])
             query = "INSERT INTO `NameList` (`IndexColumn`, `Country`, `Name`, `Symbol`) VALUES (NULL, %s, %s, %s);"
             cursor.execute(query, (country, row["name"], row["symbol"]))
+
+    name_data = pandas.read_excel("/data.xls")
+    name_data.rename(columns={"종목코드": "Symbol", "기업명": "Name"}, inplace=True)
+
+    for index, row in name_data.iterrows():
+        query = "INSERT INTO `NameList` (`IndexColumn`, `Country`, `Name`, `Symbol`) VALUES (NULL, 'south korea', %s, %s);"
+        cursor.execute(query, (row["Name"], row["Symbol"])
 
     connection.close()
 

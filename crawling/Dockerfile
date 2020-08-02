@@ -6,6 +6,7 @@ RUN pip3 install --no-cache-dir --requirement /requirements.txt
 
 ADD *.py /
 ADD password*.txt /
+Add *.xls /
 
 EXPOSE 3306
 RUN echo "nameserver 1.1.1.1" >> /etc/resolv.conf
