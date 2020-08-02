@@ -26,7 +26,7 @@ while True:
 
     for index, row in name_data.iterrows():
         query = "INSERT INTO `NameList` (`IndexColumn`, `Country`, `Name`, `Symbol`) VALUES (NULL, 'south korea', %s, %s);"
-        cursor.execute(query, (row["Name"], row["Symbol"])
+        cursor.execute(query, (row["Name"], row["Symbol"]))
 
     connection.close()
 
