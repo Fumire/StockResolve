@@ -10,10 +10,13 @@ while True:
         connection = pymysql.connect(host="fumire.moe", user="fumiremo_stock", password=f.readline().strip(), db="fumiremo_StockDB", charset="utf8", port=3306)
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
-    query = "TRUNCATE `NameList`"
+    query = "DELETE FROM `NameList` WHERE `Country` LIKE 'japan"
     cursor.execute(query)
 
-    for country in ["south korea", "japan", "united states"]:
+    query = "DELETE FROM `NameList` WHERE `Country` LIKE 'united states"
+    cursor.execute(query)
+
+    for country in ["japan", "united states"]:
         print(country)
         for _, row in investpy.get_stocks(country=country).iterrows():
             print("-", row["name"])

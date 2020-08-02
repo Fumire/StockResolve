@@ -27,15 +27,13 @@ start: Stock Name Indicator Index
 .PHONY += start
 
 stop:
+	docker ps | grep Stock && docker stop Stock_$(DATE) && dockre rm Stock_$(DATE)
 .PHONY += stop
 
 Stock: stock.py
 	docker ps | grep $@ || docker run --name $@_$(DATE) $(DETACH_OPTS) $(IMAGE_NAME) python3 /$<
 
 Name: name.py
-	docker ps | grep $@ || docker run --name $@_$(DATE) $(DETACH_OPTS) $(IMAGE_NAME) python3 /$<
-
-Indicator: indicators.py
 	docker ps | grep $@ || docker run --name $@_$(DATE) $(DETACH_OPTS) $(IMAGE_NAME) python3 /$<
 
 Index: index.py

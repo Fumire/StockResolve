@@ -2,3 +2,5 @@ investpy==0.9.14
 numpy==1.19.1
 pandas==1.1.0
 pymysql==0.10.0
+bs4==0.0.1
+fake_useragent==0.1.11
