@@ -23,7 +23,7 @@ interactive:
 	docker run --name Test --rm --interactive --tty --publish-all $(IMAGE_NAME)
 .PHONY += interactive
 
-start: Stock
+start: Stock Name Indicator Index
 .PHONY += start
 
 stop:
