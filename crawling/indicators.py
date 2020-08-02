@@ -17,9 +17,12 @@ while True:
         print(country)
         for _, row1 in investpy.get_stocks(country=country).iterrows():
             print("-", row1["name"])
-            for _, row2 in investpy.technical_indicators(country=country, name=row1["symbol"], product_type="stock", interval="5mins").iterrows():
-                query = "INSERT INTO `TechnicalData` (`IndexColumn`, `AddedTime`, `Country`, `Name`, `Symbol`, `Indicator`, `Value`, `Meaning`) VALUES (NULL, CURRENT_TIMESTAMP, %s, %s, %s, %s, %s, %s);"
-                cursor.execute(query, (country, row1["name"], row1["symbol"], row2["technical_indicator"], row2["value"], row2["signal"]))
+            try:
+                for _, row2 in investpy.technical_indicators(country=country, name=row1["symbol"], product_type="stock", interval="5mins").iterrows():
+                    query = "INSERT INTO `TechnicalData` (`IndexColumn`, `AddedTime`, `Country`, `Name`, `Symbol`, `Indicator`, `Value`, `Meaning`) VALUES (NULL, CURRENT_TIMESTAMP, %s, %s, %s, %s, %s, %s);"
+                    cursor.execute(query, (country, row1["name"], row1["symbol"], row2["technical_indicator"], row2["value"], row2["signal"]))
+            except ConnectionError as e:
+                print(e)
 
     connection.close()
 

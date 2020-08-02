@@ -1,7 +1,6 @@
 """
-Get stock data
+Get technical indicators
 """
-import datetime
 import time
 import investpy
 import pymysql
@@ -11,24 +10,19 @@ while True:
         connection = pymysql.connect(host="fumire.moe", user="fumiremo_stock", password=f.readline().strip(), db="fumiremo_StockDB", charset="utf8", port=3306)
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
+    query = "TRUNCATE `NameList`"
+    cursor.execute(query)
+
     for country in ["south korea", "japan", "united states"]:
         print(country)
-        for _, row1 in investpy.get_indices(country=country).iterrows():
+        for _, row1 in investpy.get_stocks(country=country).iterrows():
             print("-", row1["name"])
             try:
-                for date, row2 in investpy.get_index_historical_data(index=row1["name"], country=country, from_date="01/01/1900", to_date=datetime.datetime.today().strftime("%d/%m/%Y"), order="descending").iterrows():
-                    query = "SELECT * FROM `IndexData` WHERE `country` LIKE '%s' AND `Name` LIKE '%s' AND `Symbol` LIKE '%s' AND `Date` = '%s'" % (country, row1["name"], row1["symbol"], date.date())
-                    cursor.execute(query)
-
-                    if cursor.fetchall():
-                        break
-
-                    query = "INSERT INTO `IndexData` (`IndexColumn`, `Country`, `Name`, `Symbol`, `Date`, `Open`, `High`, `Low`, `Close`, `Volume`, `Currency`) VALUES (NULL, '%s', '%s', '%s', '%s', '%f', '%f', '%f', '%f', '%d', '%s');" % (country, row1["name"], row1["symbol"], date.date(), row2["Open"], row2["High"], row2["Low"], row2["Close"], row2["Volume"], row2["Currency"])
-                    cursor.execute(query)
-
-                    print("--", date.date())
-            except IndexError:
-                pass
+                for _, row2 in investpy.technical_indicators(country=country, name=row1["symbol"], product_type="stock", interval="5mins").iterrows():
+                    query = "INSERT INTO `TechnicalData` (`IndexColumn`, `AddedTime`, `Country`, `Name`, `Symbol`, `Indicator`, `Value`, `Meaning`) VALUES (NULL, CURRENT_TIMESTAMP, %s, %s, %s, %s, %s, %s);"
+                    cursor.execute(query, (country, row1["name"], row1["symbol"], row2["technical_indicator"], row2["value"], row2["signal"]))
+            except ConnectionError as e:
+                print(e)
 
     connection.close()
 
