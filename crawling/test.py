@@ -1,50 +1,30 @@
+import time
 import fake_useragent
-import requests
 import pandas
 import pymysql
-
-columns = ["quant", "ask_buy", "amount", "market_sum", "operating_profit", "per", "open_val", "ask_sell", "prev_quant", "property_total", "operating_profit_increasing_rate", "roe", "high_val", "buy_total", "frgn_rate", "debt_total", "net_income", "roa", "low_val", "sell_total", "listed_stock_cnt", "sales", "eps", "pbr", "sales_increasing_rate", "dividend", "reserve_ratio"]
+import requests
 
 user_agent = fake_useragent.UserAgent()
-session = requests.Session()
 
 while True:
-    whole_data = dict()
+    for site in ["https://www.investing.com/indices/japan-indices", "https://www.investing.com/indices/south-korea-indices", "https://www.investing.com/indices/usa-indices"]:
+        response = requests.get(site, headers={"User-Agent": user_agent.random})
 
-    for i in range(2):
-        for column in columns:
-            request_url = "https://finance.naver.com/sise/field_submit.nhn?menu=market_sum&returnUrl=http%3A%2F%2Ffinance.naver.com%2Fsise%2Fsise_market_sum.nhn%3Fsosok%3D" + str(i) + "&fieldIds=" + column
-            session.headers.update({"User-Agent": user_agent.random})
-            session.post(request_url)
+        data = pandas.read_html(response.text)[0]
 
-            page = 0
-            while True:
-                page += 1
-                print(page)
+        data = data[["Symbol", "Last"]]
+        data.dropna(inplace=True)
 
-                raw_data = session.post("https://finance.naver.com/sise/sise_market_sum.nhn?&page=" + str(page))
-                data = pandas.read_html(raw_data.text)[1]
+        print(data)
 
-                data.dropna(axis="columns", how="all", inplace=True)
-                data.dropna(axis="index", how="any", inplace=True)
+        with open("/password1.txt", "r") as f:
+            connection = pymysql.connect(host="fumire.moe", user="fumiremo_stock", password=f.readline().strip(), db="fumiremo_StockDB", charset="utf8", port=3306)
+        cursor = connection.cursor(pymysql.cursors.DictCursor)
 
-                data.rename(columns={"종목명": "name", "현재가": "price"}, inplace=True)
+        for index, row in data.iterrows():
+            sql = "INSERT INTO `IndexData` (`Symbol`, `Value`) VALUES (%s, %s)"
+            cursor.execute(sql, (row["Symbol"], row["Last"]))
 
-                if data.empty:
-                    break
+        connection.close()
 
-                for index, row in data.iterrows():
-                    if row["name"] not in whole_data:
-                        whole_data[row["name"]] = dict()
-                        whole_data[row["name"]]["price"] = row["price"]
-                    whole_data[row["name"]][column] = row[data.columns[-1]]
-
-    with open("/password1.txt", "r") as f:
-        connection = pymysql.connect(host="fumire.moe", user="fumiremo_stock", password=f.readline().strip(), db="fumiremo_StockDB", charset="utf8", port=3306)
-    cursor = connection.cursor(pymysql.cursors.DictCursor)
-
-    for name in whole_data:
-        sql = "INSERT INTO `StockData` (`name`,`" + "`,`".join(whole_data[name].keys()) + "`) VALUES ('" + name + "'," + ",".join(list(map(lambda x: "'" + str(x) + "'", whole_data[name].values()))) + ")"
-        cursor.execute(sql)
-
-    connection.close()
+    time.sleep(300)

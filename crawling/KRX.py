@@ -1,3 +1,6 @@
+"""
+KRX.py: get KRX data
+"""
 import fake_useragent
 import requests
 import pandas
