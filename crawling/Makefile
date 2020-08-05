@@ -1,6 +1,6 @@
 RANDOM := $(shell bash -c 'echo $$RANDOM')
 DATE := $(shell date "+%y%m%d")
-IMAGE_NAME = stockcrawling:$(DATE)
+IMAGE_NAME = stockcrawling
 
 DETACH_OPTS = --detach --restart "always" --publish-all 
 
@@ -16,7 +16,7 @@ delete:
 .PHONY += delete
 
 test: test.py
-	docker run --name Test --rm --tty --publish-all $(IMAGE_NAME) python3 /test.py
+	docker run --name Test --rm --tty --publish-all $(IMAGE_NAME) python3 /KRX.py
 .PHONY += test
 
 interactive:
@@ -35,16 +35,16 @@ stop:
 .PHONY += stop
 
 Stock: stock.py
-	docker ps | grep $@ || docker run --name $@_$(DATE) $(DETACH_OPTS) $(IMAGE_NAME) python3 /$<
+	docker ps | grep $@ || docker run --name $@ $(DETACH_OPTS) $(IMAGE_NAME) python3 /$<
 
 Name: name.py
-	docker ps | grep $@ || docker run --name $@_$(DATE) $(DETACH_OPTS) $(IMAGE_NAME) python3 /$<
+	docker ps | grep $@ || docker run --name $@ $(DETACH_OPTS) $(IMAGE_NAME) python3 /$<
 
 Index1: index.py
-	docker ps | grep $@ || docker run --name $@_$(DATE) $(DETACH_OPTS) $(IMAGE_NAME) python3 /$<
+	docker ps | grep $@ || docker run --name $@ $(DETACH_OPTS) $(IMAGE_NAME) python3 /$<
 
 Index2: index2.py
-	docker ps | grep $@ || docker run --name $@_$(DATE) $(DETACH_OPTS) $(IMAGE_NAME) python3 /$<
+	docker ps | grep $@ || docker run --name $@ $(DETACH_OPTS) $(IMAGE_NAME) python3 /$<
 
 KRX: KRX.py
-	docker ps | grep $@ || docker run --name $@_$(DATE) $(DETACH_OPTS) $(IMAGE_NAME) python3 /$<
+	docker ps | grep $@ || docker run --name $@ $(DETACH_OPTS) $(IMAGE_NAME) python3 /$<
