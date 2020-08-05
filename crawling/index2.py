@@ -2,16 +2,13 @@
 index2.py: get current index data
 """
 import time
-import fake_useragent
 import pandas
 import pymysql
 import requests
 
-user_agent = fake_useragent.UserAgent()
-
 while True:
     for site in ["https://www.investing.com/indices/japan-indices", "https://www.investing.com/indices/south-korea-indices", "https://www.investing.com/indices/usa-indices"]:
-        response = requests.get(site, headers={"User-Agent": user_agent.random})
+        response = requests.get(site)
 
         data = pandas.read_html(response.text)[0]
 
