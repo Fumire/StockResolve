@@ -1,17 +1,21 @@
 """
 KRX.py: get KRX data
 """
-import fake_useragent
+import time
 import requests
 import pandas
 import pymysql
 
 columns = sorted(["quant", "ask_buy", "amount", "market_sum", "operating_profit", "per", "open_val", "ask_sell", "prev_quant", "property_total", "operating_profit_increasing_rate", "roe", "high_val", "buy_total", "frgn_rate", "debt_total", "net_income", "roa", "low_val", "sell_total", "listed_stock_cnt", "sales", "eps", "pbr", "sales_increasing_rate", "dividend", "reserve_ratio"])
 
-user_agent = fake_useragent.UserAgent()
 session = requests.Session()
 
 while True:
+    hour = time.localtime().tm_hour
+    if not (9 <= hour <= 15):
+        time.sleep(600)
+        continue
+
     whole_data = dict()
 
     for i in range(2):
@@ -19,7 +23,6 @@ while True:
             print(column)
 
             request_url = "https://finance.naver.com/sise/field_submit.nhn?menu=market_sum&returnUrl=http%3A%2F%2Ffinance.naver.com%2Fsise%2Fsise_market_sum.nhn%3Fsosok%3D" + str(i) + "&fieldIds=" + column
-            session.headers.update({"User-Agent": user_agent.random})
             session.post(request_url)
 
             page = 0
