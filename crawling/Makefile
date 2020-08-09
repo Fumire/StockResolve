@@ -16,14 +16,14 @@ delete:
 .PHONY += delete
 
 test: test.py
-	docker run --name Test --rm --tty --publish-all $(IMAGE_NAME) python3 /KRX.py
+	docker run --name Test --rm --tty --publish-all $(IMAGE_NAME) python3 /test.py
 .PHONY += test
 
 interactive:
 	docker run --name Test --rm --interactive --tty --publish-all $(IMAGE_NAME)
 .PHONY += interactive
 
-start: Stock Name Index1 Index2 KRX
+start: Stock Name Index1 KRX
 .PHONY += start
 
 stop:

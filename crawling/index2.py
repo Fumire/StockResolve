@@ -4,13 +4,10 @@ index2.py: get current index data
 import time
 import pandas
 import pymysql
-import requests
 
 while True:
     for site in ["https://www.investing.com/indices/japan-indices", "https://www.investing.com/indices/south-korea-indices", "https://www.investing.com/indices/usa-indices"]:
-        response = requests.get(site)
-
-        data = pandas.read_html(response.text)[0]
+        data = pandas.read_html(site)[0]
 
         data = data[["Symbol", "Last"]]
         data.dropna(inplace=True)
