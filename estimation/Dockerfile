@@ -4,7 +4,7 @@ LABEL maintainer="230@fumire.moe"
 ADD requirements.txt /requirements.txt
 RUN pip3 install --no-cache-dir --requirement /requirements.txt
 
-ADD estimation.py /
+ADD *.py /
 ADD password*.txt /
 
 EXPOSE 3306

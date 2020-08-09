@@ -17,7 +17,7 @@ start:
 .PHONY += start
 
 test:
-	docker run --name $(CONTAINER_NAME) --rm --interactive --tty --publish-all $(IMAGE_NAME)
+	docker run --name $(CONTAINER_NAME) --rm --interactive --tty --publish-all $(IMAGE_NAME) python3 /test.py
 
 stop:
 	docker stop $(CONTAINER_NAME)
