@@ -4,9 +4,9 @@ LABEL maintainer="230@fumire.moe"
 ADD requirements.txt /requirements.txt
 RUN pip3 install --no-cache-dir --requirement /requirements.txt
 
-ADD *.py /
+VOLUME /Python
 ADD password*.txt /
 
 EXPOSE 3306
 
-ENTRYPOINT ["python3", "/estimation.py"]
+CMD ["/bin/bash"]
