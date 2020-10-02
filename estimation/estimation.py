@@ -19,7 +19,7 @@ while True:
     sql = "SELECT `Name`, `Symbol` FROM `NameList` WHERE `Country` LIKE 'south korea' ORDER BY `Name` ASC"
     cursor.execute(sql)
 
-    for name, code in sorted(map(lambda x: (x["Name"], x["Symbol"]), cursor.fetchall())):
+    for name, code in sorted(map(lambda x: (x["Name"], "%06d" % x["Symbol"]), cursor.fetchall())):
         sql = "SELECT DISTINCT cast(AddedTime as date) FROM `KRXData` WHERE `Name` LIKE %s ORDER BY cast(AddedTime as date) ASC"
         cursor.execute(sql, (name,))
         result = cursor.fetchall()
