@@ -1,106 +1,76 @@
 import datetime
-import time
+import typing
 import numpy
+import sklearn.ensemble
 import pandas
 import pymysql
-import sklearn.ensemble
-
-with open("/password1.txt", "r") as f:
-    conn = pymysql.connect(host="fumire.moe", user="fumiremo_stock", password=f.readline().strip(), db="fumiremo_StockDB", charset="utf8", port=3306)
-cursor = conn.cursor(pymysql.cursors.DictCursor)
 
 while True:
-    sql = "SELECT * FROM `Estimation` WHERE `Complete` = 0 AND `Estimation`.`Algorithm` LIKE 'RandomForest' ORDER BY `Estimation`.`IndexColumn` ASC LIMIT 1"
-    cursor.execute(sql)
-    row = cursor.fetchone()
+    with open("/password1.txt", "r") as f:
+        connection = pymysql.connect(host="fumire.moe", user="fumiremo_stock", password=f.readline().strip(), db="fumiremo_StockDB", charset="utf8", port=3306)
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
 
-    if not row:
-        break
-
-    sql = "SELECT * FROM `StockData2` WHERE `code` LIKE '" + str(row["Code"]) + "' ORDER BY `StockData2`.`date` ASC"
-    cursor.execute(sql)
-    data = pandas.DataFrame(cursor.fetchall())
-
-    macd = data.close.ewm(span=12).mean() - data.close.ewm(span=26).mean()
-    macds = macd.ewm(span=9).mean()
-    macdo = macd - macds
-    data = data.assign(macd=macd, macds=macds, macdo=macdo)
-    data.fillna(0, inplace=True)
-
-    ndays_high = data.high.rolling(window=15, min_periods=1).max()
-    ndays_low = data.low.rolling(window=15, min_periods=1).min()
-    kdj_k = ((data.close - ndays_low) / (ndays_high - ndays_low)) * 100
-    kdj_d = kdj_k.ewm(span=5).mean()
-    kdj_j = kdj_d.ewm(span=3).mean()
-    data = data.assign(kdj_k=kdj_k, kdj_d=kdj_d, kdj_j=kdj_j)
-    data.fillna(0, inplace=True)
-    data.replace(numpy.inf, 0, inplace=True)
-
-    x_train, y_train, date = data.drop(columns=["IndexColumn", "name", "code", "date", "close"]), data["close"].tolist(), data["date"].tolist()
-
-    regr = sklearn.ensemble.RandomForestRegressor(random_state=0, n_jobs=1)
-    regr.fit(x_train[:-row["Days"]], y_train[row["Days"]:])
-
-    y_pred = regr.predict(x_train)
-
-    error_rate = numpy.mean([(abs(a - b) / a if a else 1) for a, b in zip(y_train[row["Days"]:], y_pred[:-row["Days"]])]) * 100
-    gain_rate = ((y_pred[-1] - y_train[-1]) / y_train[-1] * 100) if y_train[-1] else 0
-
-    for d, r, p in list(zip(date[:-row["Days"]], y_train[row["Days"]:], y_pred[:-row["Days"]]))[-400:]:
-        sql = "INSERT INTO `EstimatedValues` (`IndexColumn`, `Algorithm`, `Identification`, `Date`, `RealValue`, `PredictValue`) VALUES (NULL, 'RandomForest', '%s', '%s', '%d', '%f');" % (row["Identification"], str(d), r, p)
-        cursor.execute(sql)
-
-    for i, p in enumerate(y_pred[-row["Days"]:]):
-        sql = "INSERT INTO `EstimatedValues` (`IndexColumn`, `Algorithm`, `Identification`, `Date`, `RealValue`, `PredictValue`) VALUES (NULL, 'RandomForest', '%s', '%s', NULL, '%f');" % (row["Identification"], str(d + datetime.timedelta(days=i + 1)), p)
-        cursor.execute(sql)
-
-    sql = "UPDATE `Estimation` SET `ErrorRate` = '%f', `GainRate` = '%f', `Complete` = '1' WHERE `Identification` = '%s'" % (error_rate, gain_rate, row["Identification"])
+    sql = "SELECT `Name`, `Symbol` FROM `NameList` WHERE `Country` LIKE 'south korea' ORDER BY `Name` ASC"
     cursor.execute(sql)
 
-    print(row["Identification"], "Done!!", error_rate, gain_rate)
+    for name, code in sorted(map(lambda x: (x["Name"], x["Symbol"]), cursor.fetchall())):
+        sql = "SELECT DISTINCT cast(AddedTime as date) FROM `KRXData` WHERE `Name` LIKE %s ORDER BY cast(AddedTime as date) ASC"
+        cursor.execute(sql, (name,))
+        result = cursor.fetchall()
 
-while True:
-    sql = "SELECT * FROM `Estimation` WHERE `Complete` = 0 AND `Estimation`.`Algorithm` LIKE 'AdaBoost' ORDER BY `Estimation`.`IndexColumn` ASC LIMIT 1"
-    cursor.execute(sql)
-    row = cursor.fetchone()
+        if len(result) == 0:
+            continue
 
-    if not row:
-        break
+        days = sorted(map(lambda x: x["cast(AddedTime as date)"], result))
 
-    sql = "SELECT * FROM `StockData2` WHERE `code` LIKE '" + str(row["Code"]) + "' ORDER BY `StockData2`.`date` ASC"
-    cursor.execute(sql)
-    data = pandas.DataFrame(cursor.fetchall())
+        whole_data = pandas.DataFrame()
+        closed_prices: typing.List[float] = list()
 
-    macd = data.close.ewm(span=12).mean() - data.close.ewm(span=26).mean()
-    macds = macd.ewm(span=9).mean()
-    macdo = macd - macds
-    data = data.assign(macd=macd, macds=macds, macdo=macdo)
-    data.fillna(0, inplace=True)
+        for day in days:
+            sql = "SELECT * FROM `KRXData` WHERE cast(`AddedTime` as date) = %s AND `Name` LIKE %s ORDER BY `AddedTime` ASC"
+            cursor.execute(sql, (day, name))
+            result = cursor.fetchall()
 
-    ndays_high = data.high.rolling(window=15, min_periods=1).max()
-    ndays_low = data.low.rolling(window=15, min_periods=1).min()
-    kdj_k = ((data.close - ndays_low) / (ndays_high - ndays_low)) * 100
-    kdj_d = kdj_k.ewm(span=5).mean()
-    kdj_j = kdj_d.ewm(span=3).mean()
-    data = data.assign(kdj_k=kdj_k, kdj_d=kdj_d, kdj_j=kdj_j)
-    data.fillna(0, inplace=True)
-    data.replace(numpy.inf, 0, inplace=True)
+            prices = numpy.array(list(map(lambda x: x["price"], result)))
+            prices = prices / prices[0]
 
-    x_train, y_train, date = data.drop(columns=["IndexColumn", "name", "code", "date", "close"]), data["close"].tolist(), data["date"].tolist()
+            if len(set(prices)) <= 1:
+                continue
 
-    regr = sklearn.ensemble.AdaBoostRegressor(random_state=0)
-    regr.fit(x_train[:-row["Days"]], y_train[row["Days"]:])
+            one_data = pandas.DataFrame(data=prices, index=list(map(lambda x: x["AddedTime"].replace(second=0, microsecond=0), result)), columns=[day])
+            one_data.loc[datetime.datetime.combine(day, datetime.time(9))] = 1.0
+            if one_data.loc[list(filter(lambda x: x.time() >= datetime.time(15, 30), one_data.index))].empty:
+                one_data.loc[datetime.datetime.combine(day, datetime.time(15, 30))] = list(one_data.iloc[-1])[0]
+            one_data.sort_index(inplace=True)
+            one_data = one_data.asfreq(freq="T")
+            one_data.drop(labels=list(filter(lambda x: x.time() > datetime.time(15, 30), one_data.index)), axis="index", inplace=True)
+            # one_data.drop(labels=list(filter(lambda x: x.time() < datetime.datetime.now().time(), one_data.index)), axis="index", inplace=True)
+            one_data.interpolate(method="time", inplace=True)
+            closed_prices.append(list(one_data.iloc[-1])[0])
+            one_data.index = list(map(lambda x: x.time(), one_data.index))
 
-    y_pred = regr.predict(x_train)
+            whole_data = whole_data.join(one_data, how="right")
 
-    error_rate = numpy.mean([(abs(a - b) / a if a else 1) for a, b in zip(y_train[row["Days"]:], y_pred[:-row["Days"]])]) * 100
-    gain_rate = ((y_pred[-1] - y_train[-1]) / y_train[-1] * 100) if y_train[-1] else 0
+            if len(closed_prices) > 10:
+                break
 
-    sql = "UPDATE `Estimation` SET `ErrorRate` = '%f', `GainRate` = '%f', `Complete` = '1' WHERE `Identification` = '%s'" % (error_rate, gain_rate, row["Identification"])
-    cursor.execute(sql)
+        whole_data = whole_data.T
 
-    print(row["Identification"], "Done!!", error_rate, gain_rate)
+        regressor = sklearn.ensemble.RandomForestRegressor(max_features=None, bootstrap=False, n_jobs=-1, random_state=0)
+        regressor.fit(whole_data.iloc[:-1], closed_prices[:-1])
 
-conn.close()
+        estimation_value, real_value = regressor.predict(whole_data.iloc[[-1]])[0], closed_prices[-1]
 
-time.sleep(60)
+        sql = "SELECT * FROM `Estimations` WHERE `Name` LIKE %s AND `Code` LIKE %s AND `EstimatedDate` = %s"
+        cursor.execute(sql, (name, code, days[-1]))
+
+        if cursor.fetchall():
+            sql = "UPDATE `Estimations` SET `Estimation` = %s, RealValue = %s WHERE `Name` LIKE %s AND `Code` LIKE %s AND `EstimatedDate` = %s"
+            cursor.execute(sql, (str(estimation_value), str(real_value), name, code, days[-1]))
+        else:
+            sql = "INSERT INTO `Estimations` (`Name`, `Code`, `EstimatedDate`, `Estimation`, `RealValue`) VALUES (%s, %s, %s, %s, %s)"
+            cursor.execute(sql, (name, code, days[-1], str(estimation_value), str(real_value)))
+
+        print(name, "Done!!")
+
+    connection.close()

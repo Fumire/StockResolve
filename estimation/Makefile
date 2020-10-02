@@ -15,11 +15,11 @@ delete:
 .PHONY += delete
 
 start:
-	docker run --name $(CONTAINER_NAME) --detach --restart "always" --publish-all $(VOLUME_OPTS) $(IMAGE_NAME)
+	docker run --name $(CONTAINER_NAME) --detach --restart "always" --publish-all $(VOLUME_OPTS) $(IMAGE_NAME) python3 /estimation.py
 .PHONY += start
 
 test:
-	docker run --name $(CONTAINER_NAME) --rm --interactive --tty --publish-all $(VOLUME_OPTS) $(IMAGE_NAME) python3 /test.py
+	docker run --name $(CONTAINER_NAME) --rm --interactive --tty --publish-all $(VOLUME_OPTS) $(IMAGE_NAME) /bin/bash
 
 stop:
 	docker stop $(CONTAINER_NAME)
