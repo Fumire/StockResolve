@@ -30,7 +30,6 @@ stop:
 	docker ps | grep Stock && docker stop Stock && docker rm Stock
 	docker ps | grep Name && docker stop Name && docker rm Name
 	docker ps | grep Index1 && docker stop Index1 && docker rm Index1
-	docker ps | grep Index2 && docker stop Index2 && docker rm Index2
 	docker ps | grep KRX && docker stop KRX && docker rm KRX
 .PHONY += stop
 
