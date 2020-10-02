@@ -1,4 +1,5 @@
 import datetime
+import time
 import typing
 import numpy
 import sklearn.ensemble
@@ -6,6 +7,11 @@ import pandas
 import pymysql
 
 while True:
+    hour = time.localtime().tm_hour
+    if not (10 <= hour <= 16):
+        time.sleep(60)
+        continue
+
     with open("/password1.txt", "r") as f:
         connection = pymysql.connect(host="fumire.moe", user="fumiremo_stock", password=f.readline().strip(), db="fumiremo_StockDB", charset="utf8", port=3306)
     cursor = connection.cursor(pymysql.cursors.DictCursor)
@@ -44,7 +50,7 @@ while True:
             one_data.sort_index(inplace=True)
             one_data = one_data.asfreq(freq="T")
             one_data.drop(labels=list(filter(lambda x: x.time() > datetime.time(15, 30), one_data.index)), axis="index", inplace=True)
-            # one_data.drop(labels=list(filter(lambda x: x.time() < datetime.datetime.now().time(), one_data.index)), axis="index", inplace=True)
+            one_data.drop(labels=list(filter(lambda x: x.time() < datetime.datetime.now().time(), one_data.index)), axis="index", inplace=True)
             one_data.interpolate(method="time", inplace=True)
             closed_prices.append(list(one_data.iloc[-1])[0])
             one_data.index = list(map(lambda x: x.time(), one_data.index))
