@@ -14,7 +14,7 @@ session = requests.Session()
 while True:
     hour = time.localtime().tm_hour
     if not (9 <= hour <= 15):
-        time.sleep(600)
+        time.sleep(60)
         continue
 
     whole_data: typing.Dict[str, typing.Dict[str, float]] = dict()
