@@ -2,6 +2,7 @@
 KRX.py: get KRX data
 """
 import time
+import typing
 import requests
 import pandas
 import pymysql
@@ -16,7 +17,7 @@ while True:
         time.sleep(600)
         continue
 
-    whole_data = dict()
+    whole_data: typing.Dict[str, typing.Dict[str, float]] = dict()
 
     for i in range(2):
         for column in columns:
@@ -30,7 +31,7 @@ while True:
                 page += 1
                 print("-", page)
 
-                raw_data = session.post("https://finance.naver.com/sise/sise_market_sum.nhn?&page=" + str(page))
+                raw_data = session.post("https://finance.naver.com/sise/sise_market_sum.nhn?page=" + str(page) + "&sosok=" + str(i))
                 data = pandas.read_html(raw_data.text)[1]
 
                 data.dropna(axis="columns", how="all", inplace=True)
