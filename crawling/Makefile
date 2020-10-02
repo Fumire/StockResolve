@@ -27,10 +27,10 @@ start: Stock Name Index1 KRX
 .PHONY += start
 
 stop:
-	docker ps | grep Stock && docker stop Stock && docker rm Stock
-	docker ps | grep Name && docker stop Name && docker rm Name
-	docker ps | grep Index1 && docker stop Index1 && docker rm Index1
-	docker ps | grep KRX && docker stop KRX && docker rm KRX
+	docker ps | grep Stock && docker stop Stock && docker rm Stock || true
+	docker ps | grep Name && docker stop Name && docker rm Name || true
+	docker ps | grep Index1 && docker stop Index1 && docker rm Index1 || true
+	docker ps | grep KRX && docker stop KRX && docker rm KRX || true
 .PHONY += stop
 
 Stock: stock.py
