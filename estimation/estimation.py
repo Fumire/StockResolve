@@ -19,12 +19,12 @@ while True:
     sql = "SELECT `Name`, `Symbol` FROM `NameList` WHERE `Country` LIKE 'south korea' ORDER BY `Name` ASC"
     cursor.execute(sql)
 
-    for name, code in sorted(map(lambda x: (x["Name"], "%06d" % x["Symbol"]), cursor.fetchall())):
+    for name, code in sorted(map(lambda x: (x["Name"], "%06d" % int(x["Symbol"])), cursor.fetchall())):
         sql = "SELECT DISTINCT cast(AddedTime as date) FROM `KRXData` WHERE `Name` LIKE %s ORDER BY cast(AddedTime as date) ASC"
         cursor.execute(sql, (name,))
         result = cursor.fetchall()
 
-        if len(result) == 0:
+        if len(result) <= 5:
             continue
 
         days = sorted(map(lambda x: x["cast(AddedTime as date)"], result))
@@ -50,7 +50,7 @@ while True:
             one_data.sort_index(inplace=True)
             one_data = one_data.asfreq(freq="T")
             one_data.drop(labels=list(filter(lambda x: x.time() > datetime.time(15, 30), one_data.index)), axis="index", inplace=True)
-            one_data.drop(labels=list(filter(lambda x: x.time() < datetime.datetime.now().time(), one_data.index)), axis="index", inplace=True)
+            one_data.drop(labels=list(filter(lambda x: x.time() > datetime.datetime.now().time(), one_data.index)), axis="index", inplace=True)
             one_data.interpolate(method="time", inplace=True)
             closed_prices.append(list(one_data.iloc[-1])[0])
             one_data.index = list(map(lambda x: x.time(), one_data.index))

@@ -17,7 +17,7 @@ start:
 .PHONY += start
 
 test:
-	docker run --name $(CONTAINER_NAME) --rm --interactive --tty --publish-all $(IMAGE_NAME) /bin/bash
+	docker run --name $(CONTAINER_NAME) --rm --interactive --tty --publish-all $(IMAGE_NAME) /bin/bash || true
 
 stop:
 	docker stop $(CONTAINER_NAME)
