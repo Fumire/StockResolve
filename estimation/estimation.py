@@ -24,7 +24,7 @@ while True:
         cursor.execute(sql, (name,))
         result = cursor.fetchall()
 
-        if len(result) <= 5:
+        if len(result) == 1:
             continue
 
         days = sorted(map(lambda x: x["cast(AddedTime as date)"], result))
@@ -59,6 +59,9 @@ while True:
 
             if len(closed_prices) > 10:
                 break
+
+        if whole_data.shape[0] <= 1:
+            continue
 
         whole_data = whole_data.T
 
