@@ -20,6 +20,8 @@ while True:
     cursor.execute(sql)
 
     for name, code in sorted(map(lambda x: (x["Name"], "%06d" % int(x["Symbol"])), cursor.fetchall())):
+        current_time = datetime.datetime.now().time()
+
         sql = "SELECT DISTINCT cast(AddedTime as date) FROM `KRXData` WHERE `Name` LIKE %s ORDER BY cast(AddedTime as date) ASC"
         cursor.execute(sql, (name,))
         result = cursor.fetchall()
@@ -50,7 +52,7 @@ while True:
             one_data.sort_index(inplace=True)
             one_data = one_data.asfreq(freq="T")
             one_data.drop(labels=list(filter(lambda x: x.time() > datetime.time(15, 30), one_data.index)), axis="index", inplace=True)
-            one_data.drop(labels=list(filter(lambda x: x.time() > datetime.datetime.now().time(), one_data.index)), axis="index", inplace=True)
+            one_data.drop(labels=list(filter(lambda x: x.time() > current_time, one_data.index)), axis="index", inplace=True)
             one_data.interpolate(method="time", inplace=True)
             closed_prices.append(list(one_data.iloc[-1])[0])
             one_data.index = list(map(lambda x: x.time(), one_data.index))
@@ -64,6 +66,7 @@ while True:
             continue
 
         whole_data = whole_data.T
+        print(whole_data)
 
         regressor = sklearn.ensemble.RandomForestRegressor(max_features=None, bootstrap=False, n_jobs=-1, random_state=0)
         regressor.fit(whole_data.iloc[:-1], closed_prices[:-1])
