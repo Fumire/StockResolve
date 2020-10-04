@@ -59,9 +59,6 @@ while True:
 
             whole_data = whole_data.join(one_data, how="right")
 
-            if len(closed_prices) > 10:
-                break
-
         if whole_data.shape[0] <= 1:
             continue
 
