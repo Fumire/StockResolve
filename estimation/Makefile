@@ -1,5 +1,4 @@
 IMAGE_NAME = stockestimation
-CONTAINER_NAME = StockEstimation
 
 all:
 .PHONY += all
@@ -12,13 +11,18 @@ delete:
 	docker rmi $(IMAGE_NAME)
 .PHONY += delete
 
-start:
-	docker run --name $(CONTAINER_NAME) --detach --restart "always" --publish-all $(IMAGE_NAME) python3 /estimation.py
+start: Estimation Result
 .PHONY += start
 
-test:
-	docker run --name $(CONTAINER_NAME) --rm --interactive --tty --publish-all $(IMAGE_NAME) /bin/bash || true
+interactive:
+	docker run --name Estimation --rm --interactive --tty --publish-all $(IMAGE_NAME) /bin/bash || true
 
 stop:
-	docker stop $(CONTAINER_NAME)
-	docker rm $(CONTAINER_NAME)
+	docker ps | grep Estimation && docker stop Estimation && docker rm Estimation || true
+	docker ps | grep Result && docker stop Result && docker rm Result || true
+
+Estimation:
+	docker ps | grep $@ || docker run --name $@ --detach --restart "always" --publish-all $(IMAGE_NAME) python3 /estimation.py
+
+Result:
+	docker ps | grep $@ || docker run --name $@ --detach --restart "always" --publish-all $(IMAGE_NAME) python3 /result.py
