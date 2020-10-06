@@ -3,7 +3,7 @@ import pymysql
 
 while True:
     hour = time.localtime().tm_hour
-    if not (hour == 16):
+    if not (10 <= hour <= 16):
         time.sleep(60)
         continue
 
