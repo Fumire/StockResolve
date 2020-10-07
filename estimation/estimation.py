@@ -68,7 +68,7 @@ while True:
 
         estimation_value = regressor.predict(whole_data.iloc[[-1]])[0]
 
-        sql = "INSERT INTO `Estimations` (`Name`, `Code`, `EstimatedDate`, `Estimation`, `RealValue`) VALUES (%s, %s, CURRENT_DATE, %s, 0)"
+        sql = "INSERT INTO `Estimations` (`Name`, `Code`, `EstimatedDate`, `Estimation`, `RealValue`) VALUES (%s, %s, CURRENT_DATE, %s, 1)"
         cursor.execute(sql, (name, code, str(estimation_value)))
 
         print(name, "Done!!")
