@@ -7,14 +7,17 @@ import pandas
 import pymysql
 
 while True:
-    hour = time.localtime().tm_hour
-    if not (hour == 0):
-        time.sleep(60)
-        continue
-
     with open("/password1.txt", "r") as f:
         connection = pymysql.connect(host="fumire.moe", user="fumiremo_stock", password=f.readline().strip(), db="fumiremo_StockDB", charset="utf8", port=3306)
     cursor = connection.cursor(pymysql.cursors.DictCursor)
+
+    sql = "SELECT * FROM `Estimations` WHERE `EstimatedDate` = CURRENT_DATE"
+    cursor.execute(sql)
+
+    if cursor.fetchall():
+        connection.close()
+        time.sleep(60)
+        continue
 
     sql = "SELECT `Name`, `Symbol` FROM `NameList` WHERE `Country` LIKE 'south korea' ORDER BY `Name` ASC"
     cursor.execute(sql)
