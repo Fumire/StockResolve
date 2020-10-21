@@ -13,6 +13,7 @@ while True:
 
     sql = "SELECT `Name` FROM `Estimations` WHERE `EstimatedDate` = CURRENT_DATE ORDER BY `Name` ASC"
     cursor.execute(sql)
+    print("SQL done")
 
     for name in sorted(map(lambda x: x["Name"], cursor.fetchall())):
         try:

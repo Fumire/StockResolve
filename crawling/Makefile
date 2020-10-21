@@ -20,7 +20,7 @@ test: test.py
 .PHONY += test
 
 interactive:
-	docker run --name Test --rm --interactive --tty --publish-all $(IMAGE_NAME)
+	docker run --name Test --rm --interactive --tty --publish-all $(IMAGE_NAME) /bin/bash || true
 .PHONY += interactive
 
 start: Stock Name Index1 KRX
